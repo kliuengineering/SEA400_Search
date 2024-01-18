@@ -121,6 +121,31 @@ def depthFirstSearch(problem: SearchProblem):
         displacement = (nodes_visited[itr+1][0] - nodes_visited[itr][0]), (nodes_visited[itr+1][1] - nodes_visited[itr][1])
         list_of_displacement.append(displacement)
 
+    # Function to process the list
+    def process_tuples(lst):
+        # Iterate over the list to find tuples where the absolute sum of elements is not zero
+        for i, (x, y) in enumerate(lst):
+            sum_abs = abs(x + y)
+            if sum_abs != 1:  # Check if the absolute sum of x and y is not 1
+                # Calculate the number of elements to sum
+                num_elements_to_sum = sum_abs - 1
+
+                # Ensure we don't go beyond the start of the list
+                start_index = max(i - num_elements_to_sum, 0)
+
+                # Sum the required elements
+                summed_tuple = tuple(map(sum, zip(*lst[start_index:i + 1])))
+
+                # Replace and shrink the list
+                lst = lst[:start_index] + [summed_tuple] + lst[i + 1:]
+                break  # Exit loop after processing
+        return lst
+
+    list_of_displacement = process_tuples(list_of_displacement)
+
+    print(nodes_visited)
+    print(list_of_displacement)
+
     # directional definition to relative displacement
     for itr in list_of_displacement:
         if itr == (-1, 0):
@@ -132,8 +157,7 @@ def depthFirstSearch(problem: SearchProblem):
         elif itr == (0, 1):
             list_of_actions.append(Directions.NORTH)
 
-    #print(nodes_visited)
-    #print(list_of_displacement)
+
     return list_of_actions
 
     util.raiseNotDefined()
