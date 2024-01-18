@@ -81,12 +81,61 @@ def depthFirstSearch(problem: SearchProblem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-
+    """
     print("Start:", problem.getStartState())
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    """
+
     "*** YOUR CODE HERE ***"
+    from game import Directions
+    from util import Stack
+
+    # return actions
+    list_of_actions = []
+
+    # relative displacement
+    list_of_displacement = []
+
+    # O(n) lookup list
+    nodes_visited = []
+
+    # define frontiers
+    nodes_frontier = Stack()
+    nodes_frontier.push( problem.getStartState() )
+
+    while not nodes_frontier.isEmpty():
+        # shift to the next state space
+        node_current = nodes_frontier.pop()
+
+        # search in the KB -> O(n)
+        if node_current not in nodes_visited:
+            nodes_visited.append(node_current)
+
+            # checks the neighbouring vertices for dupes in the KB
+            for itr in problem.getSuccessors(node_current):
+                if itr[0] not in nodes_visited:
+                    nodes_frontier.push(itr[0])
+
+    # relative displacement against the most recent state space
+    for itr in range( len(nodes_visited) - 1 ):
+        displacement = (nodes_visited[itr+1][0] - nodes_visited[itr][0]), (nodes_visited[itr+1][1] - nodes_visited[itr][1])
+        list_of_displacement.append(displacement)
+
+    # directional definition to relative displacement
+    for itr in list_of_displacement:
+        if itr == (-1, 0):
+            list_of_actions.append(Directions.WEST)
+        elif itr == (0, -1):
+            list_of_actions.append(Directions.SOUTH)
+        elif itr == (1, 0):
+            list_of_actions.append(Directions.EAST)
+        elif itr == (0, 1):
+            list_of_actions.append(Directions.NORTH)
+
+    #print(nodes_visited)
+    #print(list_of_displacement)
+    return list_of_actions
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem: SearchProblem):
