@@ -62,6 +62,35 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+*** The following part contains Kevin defined functions.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def process_tuples(lst):
+    # Iterate over the list to find tuples where the absolute sum of elements is not zero
+    for i, (x, y) in enumerate(lst):
+        sum_abs = abs(x + y)
+        if sum_abs != 1:  # Check if the absolute sum of x and y is not 1
+            # Calculate the number of elements to sum
+            num_elements_to_sum = sum_abs - 1
+
+            # Ensure we don't go beyond the start of the list
+            start_index = max(i - num_elements_to_sum, 0)
+
+            # Sum the required elements
+            summed_tuple = tuple(map(sum, zip(*lst[start_index:i + 1])))
+
+            # Replace and shrink the list
+            lst = lst[:start_index] + [summed_tuple] + lst[i + 1:]
+            break  # Exit loop after processing
+    return lst
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+*** The above part contains Kevin defined functions.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -70,7 +99,7 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem: SearchProblem):
     """
@@ -83,10 +112,50 @@ def depthFirstSearch(problem: SearchProblem):
     understand the search problem that is being passed in:
     """
     print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Is the node_start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
 
     "*** YOUR CODE HERE ***"
+
+    from util import Stack
+
+    node_start = (problem.getStartState(), 'Stop', 0)
+
+    # Create an empty Stack, and initialize the list_node_frontier to be node_start
+    list_node_frontier = Stack()
+    list_node_frontier.push(node_start)
+
+    # a list implementation of list_node_visited nodes
+    list_node_visited = []
+
+    # a dictionary implementation on the search history
+    dict_node_previous = {}
+
+    # continuous expansion
+    while not list_node_frontier.isEmpty():
+
+        node_current = list_node_frontier.pop()
+        list_node_visited.append(node_current[0])
+        print("Node:", node_current)
+
+        # Use backtracking to return the solution
+        if problem.isGoalState(node_current[0]):
+            result = []
+            temp = node_current
+            while temp is not node_start:
+                result.append(temp)
+                temp=dict_node_previous[temp]
+            return [x[1] for x in reversed(result)]
+
+        for successor in problem.getSuccessors(node_current[0]):
+            if successor[0] not in list_node_visited: # If successor is not list_node_visited
+                list_node_frontier.push(successor)
+                dict_node_previous[successor] = node_current
+
+    return [] # Goal was not found
+
+
+    '''
     from game import Directions
     from util import Stack
 
@@ -121,30 +190,11 @@ def depthFirstSearch(problem: SearchProblem):
         displacement = (nodes_visited[itr+1][0] - nodes_visited[itr][0]), (nodes_visited[itr+1][1] - nodes_visited[itr][1])
         list_of_displacement.append(displacement)
 
-    # Function to process the list
-    def process_tuples(lst):
-        # Iterate over the list to find tuples where the absolute sum of elements is not zero
-        for i, (x, y) in enumerate(lst):
-            sum_abs = abs(x + y)
-            if sum_abs != 1:  # Check if the absolute sum of x and y is not 1
-                # Calculate the number of elements to sum
-                num_elements_to_sum = sum_abs - 1
-
-                # Ensure we don't go beyond the start of the list
-                start_index = max(i - num_elements_to_sum, 0)
-
-                # Sum the required elements
-                summed_tuple = tuple(map(sum, zip(*lst[start_index:i + 1])))
-
-                # Replace and shrink the list
-                lst = lst[:start_index] + [summed_tuple] + lst[i + 1:]
-                break  # Exit loop after processing
-        return lst
-
-    list_of_displacement = process_tuples(list_of_displacement)
-
     print(nodes_visited)
     print(list_of_displacement)
+
+    # Function to process the list
+    list_of_displacement = process_tuples(list_of_displacement)
 
     # directional definition to relative displacement
     for itr in list_of_displacement:
@@ -161,6 +211,8 @@ def depthFirstSearch(problem: SearchProblem):
     return list_of_actions
 
     util.raiseNotDefined()
+'''
+
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
