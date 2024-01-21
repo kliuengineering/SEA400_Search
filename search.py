@@ -118,8 +118,11 @@ def depthFirstSearch(problem: SearchProblem):
     "*** YOUR CODE HERE ***"
 
     from util import Stack
+    from game import Actions
 
-    node_start = (problem.getStartState(), 'Stop', 0)
+    # actually, the 'STOP' is used for an undefined state
+    # it is used because the starting state is undefined relative to its own position
+    node_start = (problem.getStartState(), 'STOP', 0)
 
     # Create an empty Stack, and initialize the list_node_frontier to be node_start
     list_node_frontier = Stack()
@@ -136,23 +139,46 @@ def depthFirstSearch(problem: SearchProblem):
 
         node_current = list_node_frontier.pop()
         list_node_visited.append(node_current[0])
-        print("Node:", node_current)
+        #print("Node:", node_current)
 
-        # Use backtracking to return the solution
+        # Use backtracking, algorithm starts here
+        # 1. if the goal is found, perform the following:
         if problem.isGoalState(node_current[0]):
-            result = []
-            temp = node_current
-            while temp is not node_start:
-                result.append(temp)
-                temp=dict_node_previous[temp]
-            return [x[1] for x in reversed(result)]
 
+            # 2. the list stores actions
+            list_of_actions = []
+
+            # 3. node_pointer is a pointer to the current goal node that's just found
+            node_pointer = node_current
+
+            # 4. this following part back-tracks to the starting node
+            while node_pointer is not node_start:
+
+                # 5. action is appended to the return list
+                list_of_actions.append(node_pointer)
+
+                # 6. this can actually be proven by discrete math from SEM300
+                node_pointer = dict_node_previous[node_pointer]
+
+            # 7. list comprehension for returning the correct order of actions
+            return [action[1] for action in reversed(list_of_actions)]
+
+
+        # checks into the frontier
         for successor in problem.getSuccessors(node_current[0]):
-            if successor[0] not in list_node_visited: # If successor is not list_node_visited
+
+            # see if the successor is already inside the visited state space
+            if successor[0] not in list_node_visited:
+
+                # pushes the successor to the frontier if not visited
                 list_node_frontier.push(successor)
+
+                # append the successors' parent node to the hash map
                 dict_node_previous[successor] = node_current
 
-    return [] # Goal was not found
+
+    # returns an empty search when goal is not found
+    return []
 
 
     '''
